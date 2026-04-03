@@ -12,39 +12,38 @@ runs-on: ubuntu-latest
 
 ```
 steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
 
-- name: Checkout code
-  uses: actions/checkout@v4
+  - name: Set up Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: 'temurin'
+      java-version: '17'
 
-- name: Set up Java
-  uses: actions/setup-java@v4
-  with:
-    distribution: 'temurin'
-    java-version: '17'
+  - name: Cache Maven dependencies
+    uses: actions/cache@v4
+    with:
+      path: ~/.m2
+      key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      restore-keys: |
+        ${{ runner.os }}-m2
 
-- name: Cache Maven dependencies
-  uses: actions/cache@v4
-  with:
-    path: ~/.m2
-    key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-    restore-keys: |
-      ${{ runner.os }}-m2
+  - name: Install dependencies & compile
+    run: mvn clean compile test-compile
 
-- name: Install dependencies & compile
-  run: mvn clean compile test-compile
+  - name: Install Playwright Browsers
+    run: mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install"
 
-- name: Install Playwright Browsers
-  run: mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install"
+  - name: Run TestNG Regression Suite
+    run: mvn test -DsuiteXmlFile=src/test/resources/testrunners/testng_regression.xml
 
-- name: Run TestNG Regression Suite
-  run: mvn test -DsuiteXmlFile=src/test/resources/testrunners/testng_regression.xml
-
-- name: Upload Test Reports
-  if: always()
-  uses: actions/upload-artifact@v4
-  with:
-    name: test-reports
-    path: |
-      test-output/
-      target/surefire-reports/
+  - name: Upload Test Reports
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: test-reports
+      path: |
+        test-output/
+        target/surefire-reports/
 ```
