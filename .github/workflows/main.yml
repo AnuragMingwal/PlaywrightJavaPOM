@@ -37,6 +37,12 @@ jobs:
       - name: Run TestNG Regression Suite
         run: mvn test -DsuiteXmlFile=src/test/resources/testrunners/testng_regression.xml
 
+      - name: Run Smoke Tests
+        run: mvn test -DsuiteXmlFile=src/test/resources/testrunners/testng_smoke.xml
+        
+      - name: Run Full Suite
+        run: mvn test -DsuiteXmlFile=src/test/resources/testrunners/testng_suite.xml  
+
       - name: Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v4
