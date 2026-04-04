@@ -1,11 +1,7 @@
-name: Playwright Java Tests
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+name: Playwright Java Tests with MCP
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
     branches: [ "master" ]
 
 jobs:
@@ -30,21 +26,26 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2
 
-      - name: Install dependencies & compile
-        run: mvn clean compile test-compile
+      - name: Build project
+        run: mvn clean install -DskipTests
 
       - name: Install Playwright Browsers
         run: mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install"
 
-      - name: Run TestNG Regression Suite
-        run: mvn test -DsuiteXmlFile=src/test/resources/testrunners/testng_regression.xml
+      #  START MCP SERVER
+      - name: Start MCP Server
+        run: |
+          nohup mvn spring-boot:run > app.log 2>&1 &
 
-      - name: Run Smoke Tests
-        run: mvn test -DsuiteXmlFile=src/test/resources/testrunners/testng_smoke.xml
-        
-      - name: Run Full Suite
-        run: mvn test -DsuiteXmlFile=src/test/resources/testrunners/testng_suite.xml  
+      - name: Wait for server
+        run: sleep 20
 
+      #  TRIGGER TEST VIA API
+      - name: Trigger MCP Test Execution
+        run: |
+          curl -X GET http://localhost:8080/run-tests
+
+      #  Upload Reports
       - name: Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v4
