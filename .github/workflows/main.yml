@@ -44,13 +44,62 @@ jobs:
       - name: Trigger MCP Test Execution
         run: |
           curl -X GET http://localhost:8080/run-tests
+          
+      # Wait for test completion and report generation
+      - name: Wait for test completion
+        run: sleep 30
 
-      #  Upload Reports
-      - name: Upload Test Reports
+      # Verify reports exist
+      - name: Verify Reports Generated
+        if: always()
+        run: |
+          echo "=== Checking for Extent Report ==="
+          [ -f "build/TestExecutionReport.html" ] && echo "✓ Extent Report found" || echo "✗ Extent Report NOT found"
+          
+          echo "=== Checking for TestNG Report ==="
+          [ -f "test-output/emailable-report.html" ] && echo "✓ TestNG Report found" || echo "✗ TestNG Report NOT found"
+          
+          echo "=== Full Directory Structure ==="
+          ls -lR build/ 2>/dev/null || echo "build/ not found"
+          ls -lR test-output/ 2>/dev/null || echo "test-output/ not found"
+
+      #  Upload Extent Reports
+      - name: Upload Extent Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: extent-report
+          path: build/TestExecutionReport.html
+          if-no-files-found: warn
+          retention-days: 30
+
+      #  Upload TestNG Reports
+      - name: Upload TestNG Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testng-report
+          path: test-output/emailable-report.html
+          if-no-files-found: warn
+          retention-days: 30
+
+      # Optional: Upload all build artifacts
+      - name: Upload Complete Build Folder
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: complete-test-output
           path: |
+            build/
             test-output/
-            target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 30
+
+      # Upload app logs for debugging
+      - name: Upload Server Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs
+          path: app.log
+          if-no-files-found: warn
