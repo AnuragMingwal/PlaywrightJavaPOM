@@ -12,6 +12,21 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
   
+  <build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.5</version>
+    <relativePath/>
+</parent>
+  
   <dependencies>
 <dependency>
     <groupId>com.microsoft.playwright</groupId>
@@ -20,6 +35,13 @@
    
 </dependency>
 
+
+    <!-- Spring Boot -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <version>3.2.5</version>
+    </dependency>
 
 
 <dependency>
@@ -35,6 +57,7 @@
     <version>7.11.0</version>
     <scope>compile</scope>
 </dependency>
+
 <dependency>
     <groupId>com.github.javafaker</groupId>
     <artifactId>javafaker</artifactId>

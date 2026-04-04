@@ -1,0 +1,8 @@
+target/
+node_modules/
+test-output/
+playwright-report/
+videos/
+screenshots/
+*.log
+.DS_Store
